@@ -1,11 +1,15 @@
 package com.danwall.contact.clearskies;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -51,6 +55,38 @@ public class MainActivity extends FragmentActivity {
             // TODO replace with createMarker();
             mMarkers.add(mMap.addMarker(new MarkerOptions().position(new LatLng(38.627 + i, -90.199))));
         }
+
+        // create custom info window
+        mMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
+            @Override
+            public View getInfoWindow(Marker marker) {
+                View infoView = getLayoutInflater().inflate(R.layout.custom_infowindow, null);
+
+                TextView temp1 = (TextView) infoView.findViewById(R.id.temp1);
+                temp1.setText(Integer.toString(mCurrentWeather.getTemperature()));
+
+                ImageView icon1 = (ImageView) infoView.findViewById(R.id.icon1);
+                Drawable iconDrawable1 = getResources().getDrawable(mCurrentWeather.getIconId());
+                icon1.setImageDrawable(iconDrawable1);
+
+                /* TODO use after implementing dailyWeather
+                TextView temp2 = (TextView) infoView.findViewById(R.id.temp2);
+
+                temp2.setText(Integer.toString(mCurrentWeather.getDailyWeather()[1].getTemperature()));
+
+                ImageView icon2 = (ImageView) infoView.findViewById(R.id.icon2);
+                Drawable iconDrawable2 = getResources().getDrawable(mCurrentWeather.getDailyWeather()[1].getIconId());
+                icon2.setImageDrawable(iconDrawable2);
+                */
+
+                return infoView;
+            }
+
+            @Override
+            public View getInfoContents(Marker marker) {
+                return null;
+            }
+        });
     }
 
     @Override
@@ -95,11 +131,16 @@ public class MainActivity extends FragmentActivity {
         Double newLng = Math.random() * (maxLng - minLng) + minLng;
 
         getForecast(newLat, newLng);
+        // TODO can access mBounds just fine, but cannot access mCurrentWeather from here
+        Log.v(TAG, mBounds.toString());
 
+        // TODO update info window with temp
+        // TODO update marker with icon
         mMarkers.add(mMap.addMarker(new MarkerOptions()
-                .position(new LatLng(newLat, newLng))
-                //.title(mCurrentWeather.getTemperature() + "")
-                ));
+                        .position(new LatLng(newLat, newLng))
+                        .title("Unable to get forecast")
+                        .snippet("Please try again")
+        ));
 
 
     }
@@ -153,8 +194,8 @@ public class MainActivity extends FragmentActivity {
         String timezone = forecast.getString("timezone");
         Log.i(TAG, "From JSON: " + timezone);
 
+        // get current weather
         JSONObject currently = forecast.getJSONObject("currently");
-
         CurrentWeather currentWeather = new CurrentWeather();
         currentWeather.setHumidity(currently.getDouble("humidity"));
         currentWeather.setTime(currently.getLong("time"));
@@ -165,6 +206,17 @@ public class MainActivity extends FragmentActivity {
         currentWeather.setTimeZone(timezone);
 
         Log.d(TAG, currentWeather.getFormattedTime());
+
+        /* TODO get daily weather
+        JSONArray daily = forecast.getJSONObject("daily").getJSONArray("data");
+        CurrentWeather[] dailyWeather = new CurrentWeather[4];
+        for (int i = 0; i < dailyWeather.length; i++) {
+            dailyWeather[i] = new CurrentWeather();
+            dailyWeather[i].setTemperature(daily.getJSONObject(i).getDouble("temperature"));
+        }
+
+        currentWeather.setDailyWeather(dailyWeather);
+        */
 
         return currentWeather;
     }

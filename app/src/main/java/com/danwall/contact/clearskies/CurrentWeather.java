@@ -15,6 +15,16 @@ public class CurrentWeather {
     private double mPrecipChance;
     private String mSummary;
 
+    public CurrentWeather[] getDailyWeather() {
+        return dailyWeather;
+    }
+
+    public void setDailyWeather(CurrentWeather[] dailyWeather) {
+        this.dailyWeather = dailyWeather;
+    }
+
+    private CurrentWeather[] dailyWeather;
+
     public String getTimeZone() {
         return mTimeZone;
     }
