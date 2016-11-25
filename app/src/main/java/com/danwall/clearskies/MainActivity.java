@@ -139,9 +139,7 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
         Double newLng = Math.random() * (maxLng - minLng) + minLng;
 
         Marker marker = mMap.addMarker(new MarkerOptions()
-                .position(new LatLng(newLat, newLng))
-                .title("Unable to get forecast")
-                .snippet("Please try again"));
+                .position(new LatLng(newLat, newLng)));
 
         Forecast forecast = new Forecast(DAYS_TO_FORECAST, newLat, newLng);
         marker.setTag(forecast);
