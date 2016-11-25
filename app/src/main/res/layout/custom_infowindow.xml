@@ -36,6 +36,7 @@
                 android:id="@+id/dayLabel1"
                 android:gravity="center_horizontal"
                 android:textSize="14dp"
+                android:textColor="@android:color/darker_gray"
                 android:layout_gravity="center_horizontal"/>
 
             <TextView
@@ -44,6 +45,7 @@
                 android:text="76"
                 android:id="@+id/temp1"
                 android:gravity="center_horizontal"
+                android:textColor="@android:color/darker_gray"
                 android:layout_gravity="center_horizontal"/>
 
             <ImageView
@@ -69,6 +71,7 @@
                 android:id="@+id/dayLabel2"
                 android:gravity="center_horizontal"
                 android:textSize="14dp"
+                android:textColor="@android:color/darker_gray"
                 android:layout_gravity="center_horizontal"/>
 
             <TextView
@@ -77,6 +80,7 @@
                 android:text="67"
                 android:id="@+id/temp2"
                 android:gravity="center_horizontal"
+                android:textColor="@android:color/darker_gray"
                 android:layout_gravity="center_horizontal"/>
 
             <ImageView
@@ -102,6 +106,7 @@
                 android:id="@+id/dayLabel13"
                 android:gravity="center_horizontal"
                 android:textSize="14dp"
+                android:textColor="@android:color/darker_gray"
                 android:layout_gravity="center_horizontal"/>
 
             <TextView
@@ -110,6 +115,7 @@
                 android:text="78"
                 android:id="@+id/temp3"
                 android:gravity="center_horizontal"
+                android:textColor="@android:color/darker_gray"
                 android:layout_gravity="center_horizontal"/>
 
             <ImageView
@@ -134,6 +140,7 @@
                 android:text="Day 4"
                 android:id="@+id/dayLabel14"
                 android:gravity="center_horizontal"
+                android:textColor="@android:color/darker_gray"
                 android:layout_gravity="center_horizontal"/>
 
             <TextView
@@ -142,6 +149,7 @@
                 android:text="68"
                 android:id="@+id/temp4"
                 android:gravity="center_horizontal"
+                android:textColor="@android:color/darker_gray"
                 android:layout_gravity="center_horizontal"/>
 
             <ImageView
@@ -166,6 +174,7 @@
                 android:text="Day 5"
                 android:id="@+id/dayLabel15"
                 android:gravity="center_horizontal"
+                android:textColor="@android:color/darker_gray"
                 android:layout_gravity="center_horizontal"/>
 
             <TextView
@@ -174,6 +183,7 @@
                 android:text="81"
                 android:id="@+id/temp5"
                 android:gravity="center_horizontal"
+                android:textColor="@android:color/darker_gray"
                 android:layout_gravity="center_horizontal"/>
 
             <ImageView
