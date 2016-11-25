@@ -25,7 +25,7 @@ public class Forecast {
     }
 
     private void getForecastData(double latitude, double longitude) {
-        String apiKey = "6048546895f7bf9d065d1504ea0ac48c";
+        String apiKey = "7fe32d1b7875b316afe9457fb173f6e9";
 
         String forecastUrl = "https://api.darksky.net/forecast/" +
                 apiKey + "/" + latitude + "," + longitude;
