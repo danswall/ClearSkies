@@ -1,5 +1,9 @@
 package com.danwall.clearskies;
 
+import android.content.Context;
+import android.os.Handler;
+import android.util.Log;
+
 import com.squareup.okhttp.Call;
 import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.OkHttpClient;
@@ -14,21 +18,20 @@ import java.io.IOException;
 
 public class Forecast {
     private DailyWeather[] mForecast;
+    private double mLatitude;
+    private double mLongitude;
 
     public Forecast(int daysToForecast, double latitude, double longitude) {
         mForecast = new DailyWeather[daysToForecast];
-        getForecastData(latitude, longitude);
+        mLatitude = latitude;
+        mLongitude = longitude;
     }
 
-    public DailyWeather[] getForecast() {
-        return mForecast;
-    }
-
-    private void getForecastData(double latitude, double longitude) {
+    public void getForecast(final Context context, final ForecastCallbackInterface callback) {
         String apiKey = "7fe32d1b7875b316afe9457fb173f6e9";
 
         String forecastUrl = "https://api.darksky.net/forecast/" +
-                apiKey + "/" + latitude + "," + longitude;
+                apiKey + "/" + mLatitude + "," + mLongitude;
 
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder()
@@ -36,6 +39,8 @@ public class Forecast {
                 .build();
         Call call = client.newCall(request);
         call.enqueue(new Callback() {
+            Handler mainHandler = new Handler(context.getMainLooper());
+
             @Override
             public void onFailure(Request request, IOException e) {
             }
@@ -46,8 +51,15 @@ public class Forecast {
                     String jsonData = response.body().string();
                     if (response.isSuccessful()) {
                         setDetails(jsonData);
+                        mainHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                callback.onForecastRetrieved(mForecast);
+                            }
+                        });
                     }
                 } catch (Exception ex) {
+                    Log.d("uh", "oh");
                 }
             }
         });

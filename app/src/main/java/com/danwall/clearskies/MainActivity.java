@@ -1,6 +1,13 @@
 package com.danwall.clearskies;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.view.View;
@@ -11,6 +18,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
@@ -20,7 +28,7 @@ import java.util.ArrayList;
 
 public class MainActivity extends FragmentActivity implements OnMapReadyCallback {
 
-    private final int MAX_MARKERS = 10;
+    private final int MAX_MARKERS = 1;
     private final int DAYS_TO_FORECAST = 5;
     private final float DEFAULT_ZOOM = 8.0f;
 
@@ -42,13 +50,14 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         mMarkers = new ArrayList<>();
         mZoom = DEFAULT_ZOOM;
 
         // Move camera to Saint Louis by default
         LatLng saintLouis = new LatLng(38.627, -90.199);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(saintLouis, mZoom));
-        mBounds = mMap.getProjection().getVisibleRegion().latLngBounds;
+        mBounds = new LatLngBounds.Builder().include(saintLouis).build();
 
         // Set initial markers
         for (int i = 0; i < MAX_MARKERS; i++) {
@@ -75,14 +84,13 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
                 iconViews[4] = (ImageView) infoView.findViewById(R.id.icon5);
 
                 // Get forecast data
-                Forecast forecast = (Forecast) marker.getTag();
-                DailyWeather[] dailyWeathers = forecast.getForecast();
+                DailyWeather[] forecast = (DailyWeather[]) marker.getTag();
 
                 // Set the temperatures and icons
                 for (int i = 0; i < 5; i++) {
-                    tempViews[i].setText(Integer.toString(dailyWeathers[i].getTemperature()));
+                    tempViews[i].setText(Integer.toString(forecast[i].getTemperature()));
 
-                    Drawable iconDrawable = getResources().getDrawable(dailyWeathers[i].getIconId());
+                    Drawable iconDrawable = getResources().getDrawable(forecast[i].getIconId());
                     iconViews[i].setImageDrawable(iconDrawable);
                 }
 
@@ -131,19 +139,59 @@ public class MainActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void createMarker() {
+        // Create random Lat/Lon from map bounds
         Double maxLat = mBounds.northeast.latitude;
         Double minLat = mBounds.southwest.latitude;
         Double maxLng = mBounds.northeast.longitude;
         Double minLng = mBounds.southwest.longitude;
-        Double newLat = Math.random() * (maxLat - minLat) + minLat;
-        Double newLng = Math.random() * (maxLng - minLng) + minLng;
+        final Double newLat = Math.random() * (maxLat - minLat) + minLat;
+        final Double newLng = Math.random() * (maxLng - minLng) + minLng;
 
-        Marker marker = mMap.addMarker(new MarkerOptions()
-                .position(new LatLng(newLat, newLng)));
-
+        // Get forecast for this location
         Forecast forecast = new Forecast(DAYS_TO_FORECAST, newLat, newLng);
-        marker.setTag(forecast);
+        forecast.getForecast(this, new ForecastCallbackInterface() {
+            @Override
+            public void onForecastRetrieved(DailyWeather[] forecast) {
+                // Create the temperature icon
+                int todaysTemperature = forecast[0].getTemperature();
+                Bitmap temperatureIcon = createTemperatureIcon(todaysTemperature);
 
-        mMarkers.add(marker);
+                // Create the custom marker
+                Marker marker = mMap.addMarker(new MarkerOptions()
+                        .position(new LatLng(newLat, newLng))
+                        .icon(BitmapDescriptorFactory.fromBitmap(temperatureIcon)));
+                marker.setTag(forecast);
+
+                // Add marker to map
+                mMarkers.add(marker);
+            }
+        });
     }
+
+    private Bitmap createTemperatureIcon(int temperature) {
+        Bitmap.Config config = Bitmap.Config.ARGB_8888;
+        Bitmap iconBitmap = Bitmap.createBitmap(250, 150, config);
+        Canvas canvas = new Canvas(iconBitmap);
+
+        Paint fillColor = new Paint();
+        fillColor.setTextSize(140);
+        fillColor.setColor(Color.DKGRAY);
+        fillColor.setFakeBoldText(true);
+
+        Paint outlineColor = new Paint();
+        outlineColor.setTextSize(140);
+        outlineColor.setColor(Color.WHITE);
+        outlineColor.setStyle(Paint.Style.STROKE);
+        outlineColor.setStrokeWidth(4);
+        outlineColor.setFakeBoldText(true);
+
+        canvas.drawText(temperature + "°", 20, 110, fillColor);
+        canvas.drawText(temperature + "°", 20, 110, outlineColor);
+
+        return iconBitmap;
+    }
+}
+
+interface ForecastCallbackInterface {
+    void onForecastRetrieved(DailyWeather[] forecast);
 }
